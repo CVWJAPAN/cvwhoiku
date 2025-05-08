@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>デジタル保育園</title>
+    <style>
+        body { margin: 0; font-family: Arial; text-align: center; }
+        canvas { border: 1px solid black; }
+        #advice, #donation { margin: 10px; font-size: 18px; }
+        button { padding: 10px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>デジタル保育園</h1>
+    <canvas id="nursery" width="400" height="300"></canvas>
+    <div id="advice">クリックしてアドバイスを受けよう！</div>
+    <div id="donation">寄付総額: 0 CareCoin</div>
+    <button onclick="donate()">10 CareCoin寄付</button>
+
+    <script>
+        // メタバース（2D保育園）
+        const canvas = document.getElementById("nursery");
+        const ctx = canvas.getContext("2d");
+        let player = { x: 50, y: 50 }; // プレイヤー（親アバター）
+        const npc = { x: 300, y: 200 }; // NPC（AI保育士）
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "green"; // 保育園の床
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "blue"; // プレイヤー
+            ctx.fillRect(player.x, player.y, 20, 20);
+            ctx.fillStyle = "red"; // NPC
+            ctx.fillRect(npc.x, npc.y, 20, 20);
+        }
+
+        canvas.addEventListener("click", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            player.x = e.clientX - rect.left - 10;
+            player.y = e.clientY - rect.top - 10;
+            draw();
+            // NPC近くでアドバイス取得
+            if (Math.abs(player.x - npc.x) < 30 && Math.abs(player.y - npc.y) < 30) {
+                document.getElementById("advice").innerText = getAdvice();
+            }
+        });
+
+        draw(); // 初期描画
+
+        // 生成AI（育児アドバイス）
+        function getAdvice() {
+            const rand = Math.random();
+            if (rand < 0.5) return "お昼寝後、「大好きだよ」と言うと絆が深まります。";
+            return "泣いたら抱っこして安心させましょう。";
+        }
+
+        // ブロックチェーン（模擬寄付管理）
+        let totalDonations = 0;
+        function donate() {
+            totalDonations += 10; // 模擬CareCoin
+            document.getElementById("donation").innerText = `寄付総額: ${totalDonations} CareCoin`;
+        }
+    </script>
+</body>
+</html>
