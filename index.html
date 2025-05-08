@@ -53,11 +53,39 @@
             font-size: 1.1em;
             margin: 10px 0;
         }
+        #gameArea {
+            width: 300px;
+            height: 200px;
+            border: 2px solid #ffd700;
+            margin: 20px auto;
+            position: relative;
+            background-color: #f0f8ff;
+        }
+        #player {
+            width: 20px;
+            height: 20px;
+            background-color: #00ced1;
+            position: absolute;
+            top: 90px;
+            left: 140px;
+        }
+        #teacher {
+            width: 20px;
+            height: 20px;
+            background-color: #ff0000;
+            position: absolute;
+            top: 50px;
+            left: 50px;
+        }
     </style>
 </head>
 <body>
     <h1>キラキラ☆デジタル保育園</h1>
     <p>WASDで移動、赤い保育士さんに近づいてアドバイス！質問もメガOK！</p>
+    <div id="gameArea">
+        <div id="player"></div>
+        <div id="teacher"></div>
+    </div>
     <div class="box">
         <p>例：お昼寝しない、ぐずる？</p>
         <input type="text" id="question" placeholder="質問を入力してください">
@@ -66,7 +94,7 @@
     <p class="advice">ピョンピョン保育士さん（赤）に近づいてアドバイスGET！✨</p>
 
     <script>
-        // 質問ボタンの動作（テスト用）
+        // 質問ボタンの動作
         function askQuestion() {
             let question = document.getElementById("question").value;
             if (question) {
@@ -76,21 +104,37 @@
             }
         }
 
-        // WASDキーの移動（テスト用）
+        // WASDキーでの移動
+        let player = document.getElementById("player");
+        let teacher = document.getElementById("teacher");
+        let playerX = 140;
+        let playerY = 90;
+
         document.addEventListener("keydown", function(event) {
+            let step = 10;
             switch(event.key.toLowerCase()) {
                 case "w":
-                    alert("Wキーを押しました！上へ移動（テスト）");
+                    if (playerY > 0) playerY -= step;
                     break;
                 case "a":
-                    alert("Aキーを押しました！左へ移動（テスト）");
+                    if (playerX > 0) playerX -= step;
                     break;
                 case "s":
-                    alert("Sキーを押しました！下へ移動（テスト）");
+                    if (playerY < 180) playerY += step;
                     break;
                 case "d":
-                    alert("Dキーを押しました！右へ移動（テスト）");
+                    if (playerX < 280) playerX += step;
                     break;
+            }
+            player.style.top = playerY + "px";
+            player.style.left = playerX + "px";
+
+            // 保育士さんとの距離をチェック
+            let teacherX = 50;
+            let teacherY = 50;
+            let distance = Math.sqrt((playerX - teacherX) ** 2 + (playerY - teacherY) ** 2);
+            if (distance < 30) {
+                alert("赤い保育士さんに近づきました！アドバイス：たくさん遊んで疲れさせましょう！");
             }
         });
     </script>
