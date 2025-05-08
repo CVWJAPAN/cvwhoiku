@@ -27,12 +27,128 @@
     <div id="effect"></div>
 
     <script>
-        // デジタル保育園（2Dメタバース）
         const canvas = document.getElementById("nursery");
         const ctx = canvas.getContext("2d");
-        let player = { x: 50, y: 50, jump: 0, angle: 0 };
+        let player = { x: 50, y: 50, jump: 0, angle: 0, speed: 5 };
         const npcs = [
             { x: 500, y: 300, bounce: 0, name: "さくら先生" },
             { x: 200, y: 100, bounce: 0, name: "たかし先生" }
         ];
-        let clouds = [{ x: 100, y: 50 },
+        let clouds = [{ x: 100, y: 50 }, { x: 400, y: 80 }];
+        let balloons = [{ x: 200, y: 100 }, { x: 300, y: 150 }];
+        let toys = [{ x: 300, y: 300, spin: 0 }];
+
+        function draw() {
+            try {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // 虹色グラデーションの床
+                const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                grad.addColorStop(0, "#ff69b4"); grad.addColorStop(1, "#00b7eb");
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // 動く雲、風船、おもちゃ
+                clouds.forEach(c => {
+                    ctx.fillStyle = "white";
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
+                    ctx.fill();
+                    c.x += 0.7; if (c.x > canvas.width + 25) c.x = -25;
+                });
+                balloons.forEach(b => {
+                    ctx.fillStyle = "#ff0000";
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    b.y -= 0.5; if (b.y < -15) b.y = canvas.height + 15;
+                });
+                toys.forEach(t => {
+                    ctx.fillStyle = "#32cd32";
+                    ctx.save();
+                    ctx.translate(t.x, t.y);
+                    ctx.rotate(t.spin);
+                    ctx.fillRect(-15, -15, 30, 30);
+                    ctx.restore();
+                    t.spin += 0.08;
+                });
+
+                // プレイヤー（親アバター）
+                ctx.save();
+                ctx.translate(player.x + 10, player.y - player.jump + 10);
+                ctx.rotate(Math.sin(player.angle) * 0.2);
+                ctx.fillStyle = "#1e90ff";
+                ctx.fillRect(-10, -10, 20, 20);
+                ctx.fillStyle = "yellow";
+                ctx.font = "20px Arial";
+                ctx.fillText("😊", -5, -15);
+                ctx.restore();
+                player.jump = Math.sin(Date.now() / 150) * 10;
+                player.angle += 0.15;
+
+                // NPC（AI保育士）
+                npcs.forEach(npc => {
+                    ctx.fillStyle = "#ff0000";
+                    ctx.fillRect(npc.x, npc.y - npc.bounce, 20, 20);
+                    ctx.fillStyle = "yellow";
+                    ctx.fillText("😄", npc.x + 5, npc.y - npc.bounce - 15);
+                    ctx.font = "12px Comic Sans MS";
+                    ctx.fillText(npc.name, npc.x - 10, npc.y - npc.bounce - 30);
+                    npc.bounce = Math.sin(Date.now() / 250) * 15;
+                });
+            } catch (e) {
+                console.error("描画エラー:", e);
+            }
+        }
+
+        // プレイヤー移動（WASD）
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "w" && player.y > 0) player.y -= player.speed;
+            if (e.key === "s" && player.y < canvas.height - 20) player.y += player.speed;
+            if (e.key === "a" && player.x > 0) player.x -= player.speed;
+            if (e.key === "d" && player.x < canvas.width - 20) player.x += player.speed;
+            checkInteraction();
+        });
+
+        // クリック移動
+        canvas.addEventListener("click", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            player.x = e.clientX - rect.left - 10;
+            player.y = e.clientY - rect.top - 10;
+            if (player.x < 0) player.x = 0;
+            if (player.x > canvas.width - 20) player.x = canvas.width - 20;
+            if (player.y < 0) player.y = 0;
+            if (player.y > canvas.height - 20) player.y = canvas.height - 20;
+            checkInteraction();
+        });
+
+        // タッチ移動
+        canvas.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            player.x = e.touches[0].clientX - rect.left - 10;
+            player.y = e.touches[0].clientY - rect.top - 10;
+            if (player.x < 0) player.x = 0;
+            if (player.x > canvas.width - 20) player.x = canvas.width - 20;
+            if (player.y < 0) player.y = 0;
+            if (player.y > canvas.height - 20) player.y = canvas.height - 20;
+            checkInteraction();
+        });
+
+        function checkInteraction() {
+            npcs.forEach(npc => {
+                if (Math.abs(player.x - npc.x) < 50 && Math.abs(player.y - npc.y) < 50) {
+                    showAdvice(npc.name);
+                    showEffect("キラキラ！✨");
+                }
+            });
+        }
+
+        setInterval(draw, 16); // アニメーションループ
+
+        // 生成AI（育児アドバイス）
+        function showAdvice(npcName = null) {
+            const input = document.getElementById("inputBox").value.toLowerCase().trim();
+            const tips = [
+                { trigger: ["泣く", "泣き"], text: "子どもが泣いたら、パパの変顔で大笑い！😜 試してみて！" },
+                { trigger: ["お昼寝", "寝ない"], text: "
