@@ -19,20 +19,17 @@
 </head>
 <body>
     <h1>キラキラ☆デジタル保育園</h1>
-    <div id="guide">WASDで移動、赤い保育士さんに近づいてアドバイス！質問も入力OK！</div>
-    <canvas id="nursery" width="600" height="400"></canvas>
-    <input id="inputBox" type="text" placeholder="例：お昼寝しない、どうする？">
-    <button id="askButton" onclick="showAdvice()">質問する！</button>
-    <div id="advice">ピョンピョン保育士さん（赤）に近づいてアドバイスGET！✨</div>
-    <div id="effect"></div>
+    <p>WASDで移動、赤い保育士さんに近づいてアドバイス！質問もメガOK！</p>
+    <div>
+        <p>例：お昼寝しない、ぐずる？</p>
+        <button>質問する！</button>
+    </div>
+    <p>ピョンピョン保育士さん（赤）に近づいてアドバイスGET！✨</p>
+</body>
 
-    <script>
-        const canvas = document.getElementById("nursery");
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-            console.error("キャンバスの初期化に失敗しました。ブラウザがCanvasをサポートしているか確認してください。");
-            alert("キャンバスが動作しません。別のブラウザでお試しください。");
-            return;
+   <script>
+    alert("ページが読み込まれました！");
+   </script>
         }
 
         let player = { x: 50, y: 50, jump: 0, angle: 0, speed: 5 };
