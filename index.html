@@ -139,3 +139,48 @@
                 if (deck.length > 0) {
                     playerHand.push(deck.shift());
                 } else {
+                    document.getElementById("message").innerText += " デッキがなくなっちゃった！";
+                }
+            }
+            playerHand.splice(index, 1); // 尋ねたカードを一旦手札から削除
+            checkPairs(playerHand, "player");
+            setTimeout(computerTurn, 1000); // コンピュータのターン
+        }
+
+        // コンピュータのターン
+        function computerTurn() {
+            if (computerHand.length === 0) return;
+            let card = computerHand[Math.floor(Math.random() * computerHand.length)];
+            if (playerHand.includes(card)) {
+                document.getElementById("message").innerText = `保育士さんが${card}をもらったよ！`;
+                computerHand.push(card);
+                playerHand.splice(playerHand.indexOf(card), 1);
+            } else {
+                document.getElementById("message").innerText = `保育士さんが${card}を尋ねたけどなかったよ。カードを引くね！`;
+                if (deck.length > 0) {
+                    computerHand.push(deck.shift());
+                }
+            }
+            checkPairs(computerHand, "computer");
+            displayPlayerHand();
+        }
+
+        // ゲーム終了チェック
+        function checkGameEnd() {
+            if (playerHand.length === 0 && computerHand.length === 0) {
+                if (playerPairs > computerPairs) {
+                    document.getElementById("message").innerText = `ゲーム終了！あなたの勝ち！(あなた: ${playerPairs}ペア、保育士さん: ${computerPairs}ペア)`;
+                } else if (computerPairs > playerPairs) {
+                    document.getElementById("message").innerText = `ゲーム終了！保育士さんの勝ち！(あなた: ${playerPairs}ペア、保育士さん: ${computerPairs}ペア)`;
+                } else {
+                    document.getElementById("message").innerText = `ゲーム終了！引き分け！(あなた: ${playerPairs}ペア、保育士さん: ${computerPairs}ペア)`;
+                }
+            }
+        }
+
+        // ゲーム開始
+        initializeDeck();
+        dealCards();
+    </script>
+</body>
+</html>
