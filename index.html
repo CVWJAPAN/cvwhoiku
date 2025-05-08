@@ -1,18 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <title>Child Welfare Risk Map</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body { margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #map { height: 100vh; width: 100vw; }
   </style>
 </head>
 <body>
-<div id="map"></div>
-<script>
-  mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN'; // ← 自分のMapboxトークンに変更
-  const map
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([35.6895, 139.6917], 12); // 東京中心
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const riskAreas = [
+      {
+        name: '高リスク地域',
+        score: 0.8,
+        coords: [[35.68, 139.68], [35.68, 139.70], [35.70, 139.70], [35.70, 139.68]],
