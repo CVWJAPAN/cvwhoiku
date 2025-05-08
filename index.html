@@ -54,17 +54,15 @@
 </head>
 <body>
     <h1>キラキラ☆デジタル保育園</h1>
-    <p>カードをクリックしてペアを集めよう！同じ数字を揃えてね！</p>
+    <p>カードをクリックしてペアを集めよう！同じ数字を保育士さんから貰ってね！</p>
     <div id="gameArea">
         <div id="computerHand">
             <p>保育士さんのカード（見えないよ！）</p>
-            <!-- コンピュータの手札は隠す -->
         </div>
         <div id="playerHand">
             <p>あなたのカード</p>
-            <!-- プレイヤーの手札をここに表示 -->
         </div>
-        <div id="message"></div>
+        <div id="message">ゲーム開始！カードをクリックしてね！</div>
     </div>
 
     <script>
@@ -81,7 +79,6 @@
                     deck.push(i);
                 }
             }
-            // シャッフル
             deck.sort(() => Math.random() - 0.5);
         }
 
@@ -90,8 +87,7 @@
             playerHand = deck.splice(0, 5); // プレイヤーに5枚
             computerHand = deck.splice(0, 5); // コンピュータに5枚
             displayPlayerHand();
-            checkPairs(playerHand, "player");
-            checkPairs(computerHand, "computer");
+            checkPairs();
         }
 
         // プレイヤーの手札を表示
@@ -108,23 +104,26 @@
         }
 
         // ペアをチェック
-        function checkPairs(hand, player) {
+        function checkPairs() {
             let counts = {};
-            hand.forEach(card => {
+            playerHand.forEach(card => {
                 counts[card] = (counts[card] || 0) + 1;
                 if (counts[card] === 2) {
-                    if (player === "player") {
-                        playerPairs++;
-                        document.getElementById("message").innerText = `ペアができたよ！(${card}のペア) あなたのペア: ${playerPairs}`;
-                    } else {
-                        computerPairs++;
-                        document.getElementById("message").innerText = `保育士さんがペアを作ったよ！(${card}のペア) 保育士さんのペア: ${computerPairs}`;
-                    }
-                    hand.splice(hand.indexOf(card), 1);
-                    hand.splice(hand.indexOf(card), 1);
+                    playerPairs++;
+                    document.getElementById("message").innerText = `ペアができたよ！(${card}のペア) あなたのペア: ${playerPairs}`;
+                    playerHand = playerHand.filter(c => c !== card);
+                    displayPlayerHand();
                 }
             });
-            if (player === "player") displayPlayerHand();
+            let compCounts = {};
+            computerHand.forEach(card => {
+                compCounts[card] = (compCounts[card] || 0) + 1;
+                if (compCounts[card] === 2) {
+                    computerPairs++;
+                    document.getElementById("message").innerText = `保育士さんがペアを作ったよ！(${card}のペア) 保育士さんのペア: ${computerPairs}`;
+                    computerHand = computerHand.filter(c => c !== card);
+                }
+            });
             checkGameEnd();
         }
 
@@ -132,8 +131,9 @@
         function askForCard(card, index) {
             if (computerHand.includes(card)) {
                 document.getElementById("message").innerText = `やった！${card}をもらったよ！`;
-                playerHand.push(card);
-                computerHand.splice(computerHand.indexOf(card), 1);
+                let cardIndex = computerHand.indexOf(card);
+                playerHand.push(computerHand[cardIndex]);
+                computerHand.splice(cardIndex, 1);
             } else {
                 document.getElementById("message").innerText = `残念…${card}はなかったよ。カードを引いてね！`;
                 if (deck.length > 0) {
@@ -142,9 +142,9 @@
                     document.getElementById("message").innerText += " デッキがなくなっちゃった！";
                 }
             }
-            playerHand.splice(index, 1); // 尋ねたカードを一旦手札から削除
-            checkPairs(playerHand, "player");
-            setTimeout(computerTurn, 1000); // コンピュータのターン
+            playerHand.splice(index, 1);
+            checkPairs();
+            setTimeout(computerTurn, 1000);
         }
 
         // コンピュータのターン
@@ -153,21 +153,22 @@
             let card = computerHand[Math.floor(Math.random() * computerHand.length)];
             if (playerHand.includes(card)) {
                 document.getElementById("message").innerText = `保育士さんが${card}をもらったよ！`;
-                computerHand.push(card);
-                playerHand.splice(playerHand.indexOf(card), 1);
+                let cardIndex = playerHand.indexOf(card);
+                computerHand.push(playerHand[cardIndex]);
+                playerHand.splice(cardIndex, 1);
             } else {
                 document.getElementById("message").innerText = `保育士さんが${card}を尋ねたけどなかったよ。カードを引くね！`;
                 if (deck.length > 0) {
                     computerHand.push(deck.shift());
                 }
             }
-            checkPairs(computerHand, "computer");
+            checkPairs();
             displayPlayerHand();
         }
 
         // ゲーム終了チェック
         function checkGameEnd() {
-            if (playerHand.length === 0 && computerHand.length === 0) {
+            if (playerHand.length === 0 && computerHand.length === 0 && deck.length === 0) {
                 if (playerPairs > computerPairs) {
                     document.getElementById("message").innerText = `ゲーム終了！あなたの勝ち！(あなた: ${playerPairs}ペア、保育士さん: ${computerPairs}ペア)`;
                 } else if (computerPairs > playerPairs) {
