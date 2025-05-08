@@ -26,3 +26,21 @@
         name: '高リスク地域',
         score: 0.8,
         coords: [[35.68, 139.68], [35.68, 139.70], [35.70, 139.70], [35.70, 139.68]],
+      },
+      {
+        name: '低リスク地域',
+        score: 0.2,
+        coords: [[35.68, 139.71], [35.68, 139.73], [35.70, 139.73], [35.70, 139.71]],
+      }
+    ];
+
+    riskAreas.forEach(area => {
+      const color = area.score > 0.6 ? 'red' : area.score > 0.3 ? 'yellow' : 'green';
+      L.polygon(area.coords, {
+        color: color,
+        fillOpacity: 0.5
+      }).addTo(map).bindPopup(`${area.name}<br>リスクスコア: ${area.score}`);
+    });
+  </script>
+</body>
+</html>
