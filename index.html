@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>キラキラ☆デジタル保育園</title>
+    <title>CVW☆デジタル保育園</title>
     <style>
-        body { margin: 0; font-family: Comic Sans MS, Arial; background: linear-gradient(#f0f8ff, #e6e6fa); text-align: center; }
+        body { margin: 0; font-family: Comic Sans MS, Arial; background: linear-gradient(#e6e6fa, #f0f8ff); text-align: center; }
         h1 { color: #ff69b4; text-shadow: 2px 2px #fff; margin: 20px; font-size: 36px; }
-        canvas { border: 3px solid #ffd700; border-radius: 15px; background: #e0ffff; display: block; margin: 0 auto; }
+        canvas { border: 3px solid #ffd700; border-radius: 15px; background: #e0ffff; display: block; margin: 0 auto; width: 600px; height: 400px; }
         #advice { margin: 15px; padding: 15px; font-size: 20px; color: #ff4500; background: #fffacd; border-radius: 10px; max-width: 600px; margin: 15px auto; }
         #inputBox { margin: 10px; padding: 10px; width: 300px; font-size: 16px; border: 2px solid #ff69b4; border-radius: 5px; }
         #askButton { padding: 10px 20px; font-size: 16px; background: #ff69b4; color: white; border: none; border-radius: 5px; cursor: pointer; }
@@ -29,6 +29,12 @@
     <script>
         const canvas = document.getElementById("nursery");
         const ctx = canvas.getContext("2d");
+        if (!ctx) {
+            console.error("キャンバスの初期化に失敗しました。ブラウザがCanvasをサポートしているか確認してください。");
+            alert("キャンバスが動作しません。別のブラウザでお試しください。");
+            return;
+        }
+
         let player = { x: 50, y: 50, jump: 0, angle: 0, speed: 5 };
         const npcs = [
             { x: 500, y: 300, bounce: 0, name: "さくら先生" },
@@ -44,7 +50,8 @@
 
                 // 虹色グラデーションの床
                 const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-                grad.addColorStop(0, "#ff69b4"); grad.addColorStop(1, "#00b7eb");
+                grad.addColorStop(0, "#ff69b4");
+                grad.addColorStop(1, "#00b7eb");
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -54,14 +61,16 @@
                     ctx.beginPath();
                     ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
                     ctx.fill();
-                    c.x += 0.7; if (c.x > canvas.width + 25) c.x = -25;
+                    c.x += 0.7;
+                    if (c.x > canvas.width + 25) c.x = -25;
                 });
                 balloons.forEach(b => {
                     ctx.fillStyle = "#ff0000";
                     ctx.beginPath();
                     ctx.arc(b.x, b.y, 15, 0, Math.PI * 2);
                     ctx.fill();
-                    b.y -= 0.5; if (b.y < -15) b.y = canvas.height + 15;
+                    b.y -= 0.5;
+                    if (b.y < -15) b.y = canvas.height + 15;
                 });
                 toys.forEach(t => {
                     ctx.fillStyle = "#32cd32";
@@ -96,9 +105,13 @@
                     ctx.fillText(npc.name, npc.x - 10, npc.y - npc.bounce - 30);
                     npc.bounce = Math.sin(Date.now() / 250) * 15;
                 });
+
+                console.log("描画フレーム：プレイヤー位置", player.x, player.y);
             } catch (e) {
                 console.error("描画エラー:", e);
             }
+
+            requestAnimationFrame(draw); // 次のフレームを描画
         }
 
         // プレイヤー移動（WASD）
@@ -108,6 +121,7 @@
             if (e.key === "a" && player.x > 0) player.x -= player.speed;
             if (e.key === "d" && player.x < canvas.width - 20) player.x += player.speed;
             checkInteraction();
+            console.log("キー入力:", e.key, "プレイヤー位置:", player.x, player.y);
         });
 
         // クリック移動
@@ -120,6 +134,7 @@
             if (player.y < 0) player.y = 0;
             if (player.y > canvas.height - 20) player.y = canvas.height - 20;
             checkInteraction();
+            console.log("クリック移動:", player.x, player.y);
         });
 
         // タッチ移動
@@ -133,6 +148,7 @@
             if (player.y < 0) player.y = 0;
             if (player.y > canvas.height - 20) player.y = canvas.height - 20;
             checkInteraction();
+            console.log("タッチ移動:", player.x, player.y);
         });
 
         function checkInteraction() {
@@ -144,11 +160,47 @@
             });
         }
 
-        setInterval(draw, 16); // アニメーションループ
+        // 初回描画開始
+        requestAnimationFrame(draw);
+        console.log("アニメーション開始");
 
         // 生成AI（育児アドバイス）
         function showAdvice(npcName = null) {
             const input = document.getElementById("inputBox").value.toLowerCase().trim();
             const tips = [
                 { trigger: ["泣く", "泣き"], text: "子どもが泣いたら、パパの変顔で大笑い！😜 試してみて！" },
-                { trigger: ["お昼寝", "寝ない"], text: "
+                { trigger: ["お昼寝", "寝ない"], text: "お昼寝しない？「いっぽんばし♪」を歌いながらゆらゆら💤 スヤスヤタイム！" },
+                { trigger: ["遊び", "退屈"], text: "親子ミッション：折り紙で鶴を折ろう！✈️ 一緒に飛ばして遊ぼ！" },
+                { trigger: ["食事", "食べない"], text: "ご飯食べない？「どんな味？」とクイズに！🍎 会話が弾むよ！" },
+                { trigger: ["2歳", "幼児"], text: "2歳なら『はらぺこあおむし』を読んで！📚 寝かしつけに最適！" },
+                { trigger: [], text: "ハグ3回ミッション！💞 1, 2, 3で愛がキラキラ！やってみて！" },
+                { trigger: [], text: "親子で「かごめかごめ」を歌おう！🎵 日本の遊びで絆UP！" }
+            ];
+
+            let advice = tips.find(t => t.trigger.some(tr => input.includes(tr))) || tips[Math.floor(Math.random() * tips.length)];
+            document.getElementById("advice").innerText = npcName ? `${npcName}：${advice.text}` : advice.text;
+            if (input) document.getElementById("inputBox").value = "";
+            console.log("アドバイス表示:", advice.text);
+        }
+
+        // パーティクルエフェクト
+        function showEffect(text) {
+            const effect = document.getElementById("effect");
+            effect.innerText = text;
+            effect.style.left = `${player.x + canvas.offsetLeft - 50 + Math.random() * 100}px`;
+            effect.style.top = `${player.y + canvas.offsetTop - 100 + Math.random() * 50}px`;
+            effect.style.opacity = 1;
+            effect.style.transform = "scale(1)";
+            setTimeout(() => {
+                effect.style.transition = "opacity 1s, transform 1s";
+                effect.style.opacity = 0;
+                effect.style.transform = "scale(0)";
+            }, 100);
+            setTimeout(() => {
+                effect.style.transition = "";
+            }, 1100);
+            console.log("エフェクト表示:", text);
+        }
+    </script>
+</body>
+</html>
