@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>キラキラ☆デジタル保育園</title>
+    <title>キラキラ☆デジタル保育園 - カードゲーム</title>
     <style>
         body {
             margin: 0;
@@ -20,142 +20,122 @@
             color: #4682b4;
             font-size: 1.2em;
         }
-        .box {
-            background-color: #fffacd;
+        #gameArea {
+            width: 400px;
+            height: 300px;
             border: 2px solid #ffd700;
-            border-radius: 10px;
-            padding: 20px;
             margin: 20px auto;
-            width: 80%;
-            max-width: 500px;
-        }
-        input {
+            background-color: #f0f8ff;
             padding: 10px;
-            font-size: 1em;
-            border: 2px solid #ff69b4;
-            border-radius: 5px;
-            margin: 10px;
         }
-        button {
-            background-color: #ff69b4;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1em;
-            border-radius: 5px;
+        .card {
+            width: 50px;
+            height: 70px;
+            background-color: #fff;
+            border: 2px solid #ff69b4;
+            display: inline-block;
+            margin: 5px;
+            line-height: 70px;
+            font-size: 1.2em;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #ff1493;
+        .card:hover {
+            background-color: #ffe4e1;
         }
-        .advice {
+        #playerHand, #computerHand {
+            margin: 10px;
+        }
+        #message {
             color: #ff4500;
             font-size: 1.1em;
-            margin: 10px 0;
-        }
-        #gameArea {
-            width: 300px;
-            height: 200px;
-            border: 2px solid #ffd700;
-            margin: 20px auto;
-            position: relative;
-            background-color: #f0f8ff;
-        }
-        #player {
-            width: 20px;
-            height: 20px;
-            background-color: #00ced1;
-            position: absolute;
-            top: 90px;
-            left: 140px;
-            border-radius: 50%;
-        }
-        #teacher {
-            width: 20px;
-            height: 20px;
-            background-color: #ff0000;
-            position: absolute;
-            top: 50px;
-            left: 50px;
-            border-radius: 50%;
+            margin: 10px;
         }
     </style>
 </head>
 <body>
     <h1>キラキラ☆デジタル保育園</h1>
-    <p>WASDで移動、赤い保育士さんに近づいてアドバイス！質問もメガOK！</p>
+    <p>カードをクリックしてペアを集めよう！同じ数字を揃えてね！</p>
     <div id="gameArea">
-        <div id="player"></div>
-        <div id="teacher"></div>
+        <div id="computerHand">
+            <p>保育士さんのカード（見えないよ！）</p>
+            <!-- コンピュータの手札は隠す -->
+        </div>
+        <div id="playerHand">
+            <p>あなたのカード</p>
+            <!-- プレイヤーの手札をここに表示 -->
+        </div>
+        <div id="message"></div>
     </div>
-    <div class="box">
-        <p>例：お昼寝しない、ぐずる？</p>
-        <input type="text" id="question" placeholder="質問を入力してください">
-        <button onclick="askQuestion()">質問する！</button>
-    </div>
-    <p class="advice">ピョンピョン保育士さん（赤）に近づいてアドバイスGET！✨</p>
 
     <script>
-        // 質問ボタンの動作
-        function askQuestion() {
-            let question = document.getElementById("question").value;
-            if (question) {
-                alert("質問ありがとう！「" + question + "」に対するアドバイスを考え中…");
-            } else {
-                alert("質問を入力してください！");
+        let deck = [];
+        let playerHand = [];
+        let computerHand = [];
+        let playerPairs = 0;
+        let computerPairs = 0;
+
+        // デッキを初期化（1～10の数字カードを4枚ずつ）
+        function initializeDeck() {
+            for (let i = 1; i <= 10; i++) {
+                for (let j = 0; j < 4; j++) {
+                    deck.push(i);
+                }
             }
+            // シャッフル
+            deck.sort(() => Math.random() - 0.5);
         }
 
-        // ページ読み込み時に動作確認
-        window.onload = function() {
-            console.log("ページが読み込まれました。WASDキーを試してください。");
-        };
+        // カードを配る
+        function dealCards() {
+            playerHand = deck.splice(0, 5); // プレイヤーに5枚
+            computerHand = deck.splice(0, 5); // コンピュータに5枚
+            displayPlayerHand();
+            checkPairs(playerHand, "player");
+            checkPairs(computerHand, "computer");
+        }
 
-        // WASDキーでの移動
-        let player = document.getElementById("player");
-        let playerX = 140;
-        let playerY = 90;
+        // プレイヤーの手札を表示
+        function displayPlayerHand() {
+            let playerHandDiv = document.getElementById("playerHand");
+            playerHandDiv.innerHTML = "<p>あなたのカード</p>";
+            playerHand.forEach((card, index) => {
+                let cardDiv = document.createElement("div");
+                cardDiv.className = "card";
+                cardDiv.innerText = card;
+                cardDiv.onclick = () => askForCard(card, index);
+                playerHandDiv.appendChild(cardDiv);
+            });
+        }
 
-        document.addEventListener("keydown", function(event) {
-            console.log("キーが押されました: " + event.key); // デバッグ用
-            let step = 10;
-            switch(event.key.toLowerCase()) {
-                case "w":
-                    if (playerY > 0) {
-                        playerY -= step;
-                        console.log("上へ移動: playerY = " + playerY);
+        // ペアをチェック
+        function checkPairs(hand, player) {
+            let counts = {};
+            hand.forEach(card => {
+                counts[card] = (counts[card] || 0) + 1;
+                if (counts[card] === 2) {
+                    if (player === "player") {
+                        playerPairs++;
+                        document.getElementById("message").innerText = `ペアができたよ！(${card}のペア) あなたのペア: ${playerPairs}`;
+                    } else {
+                        computerPairs++;
+                        document.getElementById("message").innerText = `保育士さんがペアを作ったよ！(${card}のペア) 保育士さんのペア: ${computerPairs}`;
                     }
-                    break;
-                case "a":
-                    if (playerX > 0) {
-                        playerX -= step;
-                        console.log("左へ移動: playerX = " + playerX);
-                    }
-                    break;
-                case "s":
-                    if (playerY < 180) {
-                        playerY += step;
-                        console.log("下へ移動: playerY = " + playerY);
-                    }
-                    break;
-                case "d":
-                    if (playerX < 280) {
-                        playerX += step;
-                        console.log("右へ移動: playerX = " + playerX);
-                    }
-                    break;
-            }
-            player.style.top = playerY + "px";
-            player.style.left = playerX + "px";
+                    hand.splice(hand.indexOf(card), 1);
+                    hand.splice(hand.indexOf(card), 1);
+                }
+            });
+            if (player === "player") displayPlayerHand();
+            checkGameEnd();
+        }
 
-            // 保育士さんとの距離をチェック
-            let teacherX = 50;
-            let teacherY = 50;
-            let distance = Math.sqrt(Math.pow(playerX - teacherX, 2) + Math.pow(playerY - teacherY, 2));
-            if (distance < 30) {
-                alert("赤い保育士さんに近づきました！アドバイス：たくさん遊んで疲れさせましょう！");
-            }
-        });
-    </script>
-</body>
-</html>
+        // カードを尋ねる
+        function askForCard(card, index) {
+            if (computerHand.includes(card)) {
+                document.getElementById("message").innerText = `やった！${card}をもらったよ！`;
+                playerHand.push(card);
+                computerHand.splice(computerHand.indexOf(card), 1);
+            } else {
+                document.getElementById("message").innerText = `残念…${card}はなかったよ。カードを引いてね！`;
+                if (deck.length > 0) {
+                    playerHand.push(deck.shift());
+                } else {
